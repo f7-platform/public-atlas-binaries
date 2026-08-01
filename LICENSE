@@ -1,0 +1,17 @@
+Atlas — Distribution Terms
+
+The Atlas binaries distributed through this repository's Releases are
+proprietary software, © 2024–2026 F7 Platform. All rights reserved.
+
+You may download and run them under the terms presented in the product and at
+https://fseven.ai. You may not redistribute, reverse engineer except to the
+extent permitted by applicable law, or remove the signatures from the
+binaries.
+
+Third-party components inside the binaries are used under their own licenses;
+each release artifact carries the applicable notices (for example,
+OPENSSL-LICENSE.txt for the statically linked OpenSSL, Apache-2.0, and the
+bundled PostgreSQL's license inside its archive).
+
+The documentation in this repository (README.md and related files) is
+© F7 Platform and may be shared verbatim.
