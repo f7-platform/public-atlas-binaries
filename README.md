@@ -42,12 +42,19 @@ Every release attaches:
 
 - `SHA256SUMS` and per-file `.sha256` — verify with `shasum -a 256 -c` (macOS)
   or `Get-FileHash` (Windows).
-- `verification-<platform>.txt` — the release run's own signing evidence:
-  `codesign`/`stapler`/`spctl` output for the macOS artifacts (Developer ID +
-  hardened runtime + notarization ticket) and `Get-AuthenticodeSignature`
-  output for the Windows artifacts (Azure Trusted Signing), captured from the
-  exact files published.
-- `latest.json` — the update manifest packaged instances poll.
+- `latest.json` — the update manifest packaged instances poll (with its
+  detached signature once update signing is live).
+
+You can verify the signatures yourself on the files you downloaded:
+
+- macOS: `spctl -a -vv -t open --context context:primary-signature <dmg>` and
+  `codesign --verify --strict <dmg>` — Developer ID, hardened runtime,
+  notarization ticket stapled.
+- Windows: `Get-AuthenticodeSignature <file>` — signed via Azure Trusted
+  Signing with a timestamp.
+
+The release pipeline additionally captures full verification transcripts from
+the exact published files; those are archived with the internal build record.
 
 macOS artifacts are notarized by Apple; Windows artifacts are Authenticode
 signed. Gatekeeper and SmartScreen should accept them without overrides — if
