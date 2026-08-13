@@ -1,0 +1,73 @@
+name: claims-check
+
+# Minimal claims-checker CI (audit run-38 PB19; f7-platform/public-agent-binaries#38).
+# This repo is the public download door for Atlas: release assets are published by
+# the product's release workflow through the GitHub Releases API, and the tracked
+# tree is documentation only. This check keeps that tree honest:
+#   1. tree hygiene — internal process/agent files must never enter the public tree
+#      (the 97dc3d0 decision: release-tag source archives are customer-visible).
+#   2. claims — every f7-platform URL asserted in the tracked markdown must resolve,
+#      and the download door itself (releases/latest) must be a published, non-draft
+#      release that actually carries assets.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 7 * * 1'   # weekly: docs drift vs live releases
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  claims-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Tree hygiene (no internal process files in the public tree)
+        run: |
+          set -euo pipefail
+          bad=0
+          for p in CLAUDE.md .claude .github/copilot-instructions.md .github/agents \
+                   .github/workflows/audit-evidence-gate.yml; do
+            if [ -e "$p" ]; then
+              echo "::error::internal process file in public tree: $p"
+              bad=1
+            fi
+          done
+          exit "$bad"
+
+      - name: Asserted f7-platform URLs resolve
+        run: |
+          set -euo pipefail
+          fail=0
+          urls=$(grep -RhoE 'https://(github\.com|raw\.githubusercontent\.com)/f7-platform/[^ )">]+' -- *.md \
+                 | sed 's/[.,]$//' | sort -u)
+          for u in $urls; do
+            if curl -fsSL -o /dev/null --retry 3 "$u"; then
+              echo "ok   $u"
+            else
+              echo "::error::dead claim in tracked markdown: $u"
+              fail=1
+            fi
+          done
+          exit "$fail"
+
+      - name: Download door is real (latest release published with assets)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          latest=$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" \
+                   -q '{tag: .tag_name, draft: .draft, assets: (.assets | length)}')
+          echo "latest release: $latest"
+          tag=$(echo "$latest"    | jq -r .tag)
+          draft=$(echo "$latest"  | jq -r .draft)
+          assets=$(echo "$latest" | jq -r .assets)
+          if [ -z "$tag" ] || [ "$draft" != "false" ] || [ "$assets" -lt 1 ]; then
+            echo "::error::releases/latest is not a published release with assets (tag=$tag draft=$draft assets=$assets)"
+            exit 1
+          fi
