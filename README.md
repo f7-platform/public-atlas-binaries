@@ -42,8 +42,14 @@ Every release attaches:
 
 - `SHA256SUMS` and per-file `.sha256` — verify with `shasum -a 256 -c` (macOS)
   or `Get-FileHash` (Windows).
-- `latest.json` — the update manifest packaged instances poll (with its
-  detached signature once update signing is live).
+- `latest.json` — the update manifest packaged instances poll, with its
+  detached signature `latest.json.sig` and the Ed25519 public key
+  `atlas-update.pub.pem` that verifies it. Check the key is Atlas's before
+  trusting it: `openssl pkey -pubin -in atlas-update.pub.pem -text -noout`
+  prints `541c8781ea1d98dc5dd23252a9f5a052cdfdd4b30774291471179be0c7deee06`,
+  the same 32 bytes compiled into every download. Verify with
+  `openssl pkeyutl -verify -rawin -pubin -inkey atlas-update.pub.pem
+  -sigfile latest.json.sig -in latest.json`.
 
 You can verify the signatures yourself on the files you downloaded:
 
