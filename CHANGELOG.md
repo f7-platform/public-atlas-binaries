@@ -3,6 +3,14 @@
 User-visible changes to the Atlas distribution channel. Per-release product
 changes live in each release's notes on the Releases page.
 
+## 2026-09-20
+
+- The claims check now also reads the issue templates under `.github/`, not just
+  the markdown at the top of the repository. The links those forms show you
+  before you file an issue are asserted at people who are not signed in, so they
+  are now held to the same rule as the links in the README: if one stops
+  resolving, the check fails.
+
 ## 2026-08-14
 
 - The README's verification section now describes update-manifest signing,
