@@ -44,13 +44,20 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          urls=$(grep -RhoE 'https://(github\.com|raw\.githubusercontent\.com)/f7-platform/[^ )">]+' -- *.md \
-                 | sed 's/[.,]$//' | sort -u)
+          # Scope: the tracked markdown at the root, plus everything under .github/.
+          # The issue forms and their picker assert f7-platform URLs at people who are
+          # not signed in, so a dead pointer there is as public as one in the README.
+          # Before run-42 this step read only *.md and could not see them (PTB1).
+          # The character class also excludes the single quote so a YAML-quoted URL
+          # does not carry its closing quote into the request.
+          pattern='https://(github\.com|raw\.githubusercontent\.com)/f7-platform/[^ )">'"'"']+'
+          urls=$(grep -RhoE "$pattern" -- *.md .github | sed "s/[.,]*$//" | sort -u)
+          echo "checking $(echo "$urls" | grep -c . ) asserted URL(s)"
           for u in $urls; do
             if curl -fsSL -o /dev/null --retry 3 "$u"; then
               echo "ok   $u"
             else
-              echo "::error::dead claim in tracked markdown: $u"
+              echo "::error::dead claim in the public tree: $u"
               fail=1
             fi
           done
