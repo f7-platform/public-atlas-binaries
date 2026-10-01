@@ -1,0 +1,9 @@
+# public-atlas-binaries — Claude Code Instructions
+
+This repository is the public download point for Atlas: signed installers for macOS and Windows, their checksums, the update manifest `latest.json` with its signature, and the public key `atlas-update.pub.pem` that verifies it. They arrive as GitHub release assets, published by fseven-atlas-mvp's `Release binary` workflow (`.github/workflows/release-binary.yml`) when a `binary-v*` tag is pushed there; its step "Mirror the customer downloads to public-atlas-binaries" creates the release here under the same tag. There is no source here.
+
+Never commit a binary, checksum, manifest, signature or key to the tree, and never upload or replace a release asset by hand: release assets come only from that workflow, and the tracked tree is documentation only. GitHub's release-tag source archives serve this tree, so everything committed here is customer-visible; internal process files stay in the private workspace (commit 97dc3d0).
+
+The one check is `claims-check` (`.github/workflows/claims-check.yml`), run on every pull request, every push to main and weekly. It fails if an internal process file (`CLAUDE.md`, `.claude`, `.github/copilot-instructions.md`, `.github/agents`, `.github/workflows/audit-evidence-gate.yml`) is in the tree, if an f7-platform URL in the root Markdown or under `.github/` does not resolve, or if `releases/latest` is not a published release carrying assets.
+
+The development rules are the skill library in the `fseven-platform` workspace repository, https://github.com/f7-platform/fseven-platform/tree/main/.claude/skills (entry point `f7-agent-operating-discipline`). The workspace rules in https://github.com/f7-platform/fseven-platform/blob/main/.claude/WORKFLOW-RULES.md and the `f7-change-control` skill take precedence over this file, which holds only this repository's own conventions.
