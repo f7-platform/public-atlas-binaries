@@ -3,7 +3,11 @@ name: claims-check
 # Minimal claims-checker CI (audit run-38 PB19; f7-platform/public-agent-binaries#38).
 # This repo is the public download door for Atlas: release assets are published by
 # the product's release workflow through the GitHub Releases API, and the tracked
-# tree is documentation only. This check keeps that tree honest:
+# tree is documentation only, with one exception: the issue label gate workflow
+# (.github/workflows/issue-label-gate.yml) and the issue forms under
+# .github/ISSUE_TEMPLATE/ are deployed copies of the platform's issue label
+# contract, edited at their canonical source and not here. This check keeps that
+# tree honest:
 #   1. tree hygiene — internal process/agent files must never enter the public tree
 #      (the 97dc3d0 decision: release-tag source archives are customer-visible).
 #   2. claims — every f7-platform URL asserted in the tracked markdown must resolve,
@@ -31,6 +35,10 @@ jobs:
         run: |
           set -euo pipefail
           bad=0
+          # The one exception to "only what a downloader needs" is the deployed
+          # issue label gate (.github/workflows/issue-label-gate.yml) and the issue
+          # forms under .github/ISSUE_TEMPLATE/, copies of the platform's issue
+          # label contract; they are deliberately not in this list.
           for p in CLAUDE.md .claude .github/copilot-instructions.md .github/agents \
                    .github/workflows/audit-evidence-gate.yml; do
             if [ -e "$p" ]; then
