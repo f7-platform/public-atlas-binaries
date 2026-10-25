@@ -3,6 +3,14 @@
 User-visible changes to the Atlas distribution channel. Per-release product
 changes live in each release's notes on the Releases page.
 
+## 2026-10-25
+
+- The claims check now fails with a message when it finds no link to check.
+  It used to stop without saying anything if the files it reads held no
+  f7-platform link at all, which would hide a check that had stopped looking at
+  the right files. It now says that no link was found and fails, and it reports
+  separately when it could not read the files.
+
 ## 2026-09-20
 
 - The claims check now also reads the issue templates under `.github/`, not just
