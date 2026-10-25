@@ -51,8 +51,25 @@ jobs:
           # The character class also excludes the single quote so a YAML-quoted URL
           # does not carry its closing quote into the request.
           pattern='https://(github\.com|raw\.githubusercontent\.com)/f7-platform/[^ )">'"'"']+'
-          urls=$(grep -RhoE "$pattern" -- *.md .github | sed "s/[.,]*$//" | sort -u)
-          echo "checking $(echo "$urls" | grep -c . ) asserted URL(s)"
+          # Fail closed (PTB5, audit run 43). grep exits 1 when nothing matches
+          # and 2 when it could not read the scope; under pipefail both used to
+          # kill the step before it printed a count or an ::error::. Now a real
+          # grep error is an error, and an empty list is one too: a scope that
+          # asserts no URL means the scope or the pattern stopped matching, and
+          # a check of nothing is not a pass.
+          grep_rc=0
+          found=$(grep -RhoE "$pattern" -- *.md .github) || grep_rc=$?
+          if [ "$grep_rc" -gt 1 ]; then
+            echo "::error::grep could not scan *.md and .github for asserted f7-platform URLs (exit $grep_rc)"
+            exit 1
+          fi
+          urls=$(printf '%s\n' "$found" | sed "s/[.,]*$//" | sed '/^$/d' | sort -u)
+          count=$(printf '%s\n' "$urls" | grep -c .) || true
+          if [ "$count" -eq 0 ]; then
+            echo "::error::no asserted f7-platform URL was found in *.md or .github, so the scope or the pattern no longer matches and this step would check nothing"
+            exit 1
+          fi
+          echo "checking $count asserted URL(s)"
           for u in $urls; do
             if curl -fsSL -o /dev/null --retry 3 "$u"; then
               echo "ok   $u"
