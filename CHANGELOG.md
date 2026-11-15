@@ -3,6 +3,35 @@
 User-visible changes to the Atlas distribution channel. Per-release product
 changes live in each release's notes on the Releases page.
 
+## 2026-10-25
+
+- The repository names the one exception to carrying only what a downloader
+  needs. Since the issue label gate was deployed here, the tree also carries
+  `.github/workflows/issue-label-gate.yml` and the issue forms under
+  `.github/ISSUE_TEMPLATE/` (`bug.yml`, `enhancement.yml`, `task.yml` and
+  `config.yml`). They are deployed copies of the platform's issue label
+  contract, kept so issues filed here are labelled the same way as everywhere
+  else, and they are not edited here. The 2026-08-09 entry below said the tree
+  carries only downloader material; that held until the gate arrived. The
+  claims check's header and its tree hygiene step now name the same exception.
+- `SECURITY.md` no longer says every release attaches verification transcripts.
+  Releases attach `SHA256SUMS` and a `.sha256` companion per download; the
+  transcripts stay with the internal build record, as the README says.
+
+- The claims check now fails with a message when it finds no link to check.
+  It used to stop without saying anything if the files it reads held no
+  f7-platform link at all, which would hide a check that had stopped looking at
+  the right files. It now says that no link was found and fails, and it reports
+  separately when it could not read the files.
+
+## 2026-09-20
+
+- The claims check now also reads the issue templates under `.github/`, not just
+  the markdown at the top of the repository. The links those forms show you
+  before you file an issue are asserted at people who are not signed in, so they
+  are now held to the same rule as the links in the README: if one stops
+  resolving, the check fails.
+
 ## 2026-08-14
 
 - The README's verification section now describes update-manifest signing,

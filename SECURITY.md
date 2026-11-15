@@ -13,8 +13,9 @@ issues for security reports.
 
 ## Verifying artifacts
 
-Every release attaches `SHA256SUMS`, per-file `.sha256` companions, and the
-release run's signing evidence (`verification-*.txt`). macOS artifacts are
+Every release attaches `SHA256SUMS` and a `.sha256` companion for each
+download. The release pipeline's full verification transcripts are not
+attached; they stay with the internal build record. macOS artifacts are
 Developer ID signed, hardened-runtime, and notarized; Windows artifacts are
 signed via Azure Trusted Signing. A file that fails checksum or signature
 verification should be reported as above, not run.
